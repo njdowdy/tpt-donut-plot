@@ -1,0 +1,13 @@
+group,status,count
+fleas,accepted,2212
+lice,accepted,5296
+ticks,accepted,854
+diptera,accepted,18664
+hemiptera,accepted,7609
+mites,accepted,31432
+fleas,invalid,632
+lice,invalid,3824
+ticks,invalid,2221
+diptera,invalid,7264
+hemiptera,invalid,845
+mites,invalid,10598

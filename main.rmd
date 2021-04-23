@@ -1,0 +1,90 @@
+---
+title: "TPT Taxonomy Donut Plot"
+author: "Dr. Nicolas J. Dowdy"
+date: "3/30/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+```
+
+## Import data and generate separate datasets for each group
+
+```{r pressure, echo=FALSE}
+df <- read.csv(file = "input/tpt_group_name_counts.csv")
+df_fleas <- df[which(df$group == 'fleas'),]
+df_diptera <- df[which(df$group == 'diptera'),]
+df_lice <- df[which(df$group == 'lice'),]
+df_ticks <- df[which(df$group == 'ticks'),]
+df_hemiptera <- df[which(df$group == 'hemiptera'),]
+df_mites <- df[which(df$group == 'mites'),]
+ 
+```
+
+## Define a function to produce donut plots using ggplot2 library hacks
+
+```{r}
+donutPlot <- function(data, color_valid, color_invalid) {
+   # Compute percentages
+data$fraction <- data$count / sum(data$count)
+
+# Compute the cumulative percentages (top of each rectangle)
+data$ymax <- cumsum(data$fraction)
+
+# Compute the bottom of each rectangle
+data$ymin <- c(0, head(data$ymax, n=-1))
+
+# Compute label position
+data$labelPosition <- (data$ymax + data$ymin) / 2
+
+# Compute a good label
+data$label <- paste0(data$status, "\n value: ", data$count)
+
+# Make the plot
+ggplot(data, aes(ymax=ymax, ymin=ymin, xmax=4, xmin=3, fill=rev(status))) +
+  geom_rect() +
+  geom_text( x=0, aes(y=labelPosition, label=label, color=status), size=6) + # x here controls label position (inner / outer)
+  # scale_fill_brewer(palette=colpalette) +
+  # scale_color_brewer(palette=colpalette) +
+  scale_fill_manual(values = c(color_invalid, color_valid)) +
+  scale_color_manual(values = c(color_invalid, color_valid)) +
+  coord_polar(theta="y") +
+  xlim(c(-1, 4)) +
+  theme_void() +
+  theme(legend.position = "none")
+  #ggtitle(title)
+
+}
+```
+
+## Produce each plot and write out
+
+```{r}
+svg("output/plots/fleas.svg")
+donutPlot(df_fleas, 'lightcoral', 'snow2')
+dev.off()
+
+svg("output/plots/diptera.svg")
+donutPlot(df_diptera, 'lightcoral', 'snow2')
+dev.off()
+
+svg("output/plots/hemiptera.svg")
+donutPlot(df_hemiptera, 'lightcoral', 'snow2')
+dev.off()
+
+svg("output/plots/lice.svg")
+donutPlot(df_lice, 'lightcoral', 'snow2')
+dev.off()
+
+svg("output/plots/mites.svg")
+donutPlot(df_mites, 'lightcoral', 'snow2')
+dev.off()
+
+svg("output/plots/ticks.svg")
+donutPlot(df_ticks, 'lightcoral', 'snow2')
+dev.off()
+
+```
+
